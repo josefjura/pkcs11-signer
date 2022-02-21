@@ -24,29 +24,14 @@ const FileChooser = ({ onChosen }: FileChooserProps) => {
   return (
     <form>
       <div className={styles.fileInput}>
-        <input
-          title="pdf"
-          type="file"
-          name="pdf"
-          id="pdf"
-          accept="application/pdf"
-          className={styles.file}
-          onChange={uploadToClient}
-        />
-        <label htmlFor="pdf">
-          {document ? "Select different file" : "Select file"}
-        </label>
+        <input title="pdf" type="file" name="pdf" id="pdf" accept="application/pdf" className={styles.file} onChange={uploadToClient} />
+        <label htmlFor="pdf">{document ? "Select different file" : "Select file"}</label>
       </div>
       <div>
         {document && (
           <div className={styles.sendPanel}>
             {document.name} - {document.size}b
-            <input
-              type="button"
-              className={styles.button}
-              onClick={uploadToServer}
-              value="Confirm selection"
-            />
+            <input type="button" className={styles.button} onClick={uploadToServer} value="Confirm selection" />
           </div>
         )}
       </div>

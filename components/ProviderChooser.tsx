@@ -19,9 +19,7 @@ const ProviderChooser = ({ onChosen, onBack }: ProviderChooserProps) => {
     }
 
     return () => {
-      ws?.cardReader
-        .removeListener("insert", updateState)
-        .removeListener("remove", updateState);
+      ws?.cardReader.removeListener("insert", updateState).removeListener("remove", updateState);
     };
   }, [ws, connected]);
 
@@ -40,20 +38,9 @@ const ProviderChooser = ({ onChosen, onBack }: ProviderChooserProps) => {
       <div className={styles.question}>Select certificate provider</div>
       <div className={styles.stack}>
         {providers.map((provider, i) => (
-          <input
-            type="button"
-            className={styles.button}
-            key={i}
-            onClick={() => onChosen(provider)}
-            value={provider?.token?.label ?? provider.name}
-          />
+          <input type="button" className={styles.button} key={i} onClick={() => onChosen(provider)} value={provider?.token?.label ?? provider.name} />
         ))}
-        <input
-          type="button"
-          className={styles.button}
-          onClick={onBack}
-          value="Back"
-        />
+        <input type="button" className={styles.button} onClick={onBack} value="Back" />
       </div>
     </div>
   );

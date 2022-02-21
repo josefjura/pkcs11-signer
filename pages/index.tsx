@@ -1,12 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import {
-  ChangeEventHandler,
-  MouseEventHandler,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEventHandler, MouseEventHandler, useEffect, useState } from "react";
 import styles from "../styles/Home.module.css";
 import download from "downloadjs";
 import { parse } from "path";
@@ -44,11 +39,7 @@ const Home: NextPage = () => {
   const sign = async () => {
     if (!selectedCertificate?.keyId) return;
     const providerForReal = await ws?.getCrypto(selectedProvider.id);
-    const key = await getCertificateKey(
-      "private",
-      providerForReal,
-      selectedCertificate.fullName
-    );
+    const key = await getCertificateKey("private", providerForReal, selectedCertificate.fullName);
   };
 
   const uploadToServer = async () => {
@@ -61,10 +52,7 @@ const Home: NextPage = () => {
       body,
     });
     const fileName = parse(selectedFile.name);
-    download(
-      await response.blob(),
-      `${fileName.name}_${new Date().toISOString()}.${fileName.ext}`
-    );
+    download(await response.blob(), `${fileName.name}_${new Date().toISOString()}.${fileName.ext}`);
   };
 
   const backToFiles = () => {
@@ -82,52 +70,23 @@ const Home: NextPage = () => {
       <Head>
         <title>Czechpoint Signer Tech Demo</title>
         <link rel="icon" href="/favicon.ico" />
-        <script
-          defer
-          src="https://fortifyapp.com/external/asmCrypto/2.3.2/asmcrypto.all.es5.min.js"
-        ></script>
-        <script
-          defer
-          src="https://fortifyapp.com/external/elliptic/elliptic.min.js"
-        ></script>
-        <script
-          defer
-          type="module"
-          src="https://fortifyapp.com/external/webcrypto-liner/1.2.3/webcrypto-liner.shim.min.mjs"
-        ></script>
+        <script defer src="https://fortifyapp.com/external/asmCrypto/2.3.2/asmcrypto.all.es5.min.js"></script>
+        <script defer src="https://fortifyapp.com/external/elliptic/elliptic.min.js"></script>
+        <script defer type="module" src="https://fortifyapp.com/external/webcrypto-liner/1.2.3/webcrypto-liner.shim.min.mjs"></script>
 
-        <script
-          defer
-          src="https://fortifyapp.com/external/protobuf/6.8.0/protobuf.min.js"
-        ></script>
-        <script
-          defer
-          type="module"
-          src="https://fortifyapp.com/external/webcrypto-local/client/1.6.5/webcrypto-socket.min.mjs"
-        ></script>
+        <script defer src="https://fortifyapp.com/external/protobuf/6.8.0/protobuf.min.js"></script>
+        <script defer type="module" src="https://fortifyapp.com/external/webcrypto-local/client/1.6.5/webcrypto-socket.min.mjs"></script>
       </Head>
       <div className={styles.container}>
         <div className={styles.centered}>
           <Connection connected={connected} />
           {!selectedFile && <FileChooser onChosen={confirmFile} />}
-          {selectedFile && !selectedProvider && (
-            <ProviderChooser onChosen={confirmProvider} onBack={backToFiles} />
-          )}
+          {selectedFile && !selectedProvider && <ProviderChooser onChosen={confirmProvider} onBack={backToFiles} />}
           {selectedFile && selectedProvider && !selectedCertificate && (
-            <CertificateChooser
-              onChosen={confirmCertificate}
-              providerId={selectedProvider.id}
-              onBack={backToProviders}
-            />
+            <CertificateChooser onChosen={confirmCertificate} providerId={selectedProvider.id} onBack={backToProviders} />
           )}
           {selectedFile && selectedProvider && selectedCertificate && (
-            <Summary
-              file={selectedFile}
-              provider={selectedProvider}
-              certificate={selectedCertificate}
-              onConfirm={sign}
-              onBack={backTocerts}
-            />
+            <Summary file={selectedFile} provider={selectedProvider} certificate={selectedCertificate} onConfirm={sign} onBack={backTocerts} />
           )}
         </div>
       </div>

@@ -9,11 +9,7 @@ type CertificateChooserProps = {
   providerId: string;
 };
 
-const CertificateChooser = ({
-  onChosen,
-  providerId,
-  onBack,
-}: CertificateChooserProps) => {
+const CertificateChooser = ({ onChosen, providerId, onBack }: CertificateChooserProps) => {
   const [certificates, setCertificates] = useState<any[]>([]);
 
   const { ws, connected } = useFortify();
@@ -76,20 +72,9 @@ const CertificateChooser = ({
       <div className={styles.question}>Select certificate</div>
       <div className={styles.stack}>
         {certificates.map((certificate, i) => (
-          <input
-            type="button"
-            className={styles.button}
-            key={i}
-            onClick={() => load(certificate)}
-            value={certificate.name}
-          />
+          <input type="button" className={styles.button} key={i} onClick={() => load(certificate)} value={certificate.name} />
         ))}
-        <input
-          type="button"
-          className={styles.button}
-          onClick={onBack}
-          value="Back"
-        />
+        <input type="button" className={styles.button} onClick={onBack} value="Back" />
       </div>
     </div>
   );
