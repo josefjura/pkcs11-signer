@@ -5,9 +5,16 @@ type SummaryProps = {
   provider: any;
   certificate: any;
   onConfirm: () => void;
+  onBack: () => void;
 };
 
-const Summary = ({ certificate, file, provider, onConfirm }: SummaryProps) => {
+const Summary = ({
+  certificate,
+  file,
+  provider,
+  onConfirm,
+  onBack,
+}: SummaryProps) => {
   return (
     <div className={styles.centered}>
       <div className={styles.question}>
@@ -22,13 +29,20 @@ const Summary = ({ certificate, file, provider, onConfirm }: SummaryProps) => {
       <span>
         <b>Certificate ID:</b> {certificate.id}
       </span>
-
-      <input
-        type="button"
-        className={styles.button}
-        value="Sign the document"
-        onClick={onConfirm}
-      />
+      <div className={styles.stack}>
+        <input
+          type="button"
+          className={styles.button}
+          value="Sign the document"
+          onClick={onConfirm}
+        />
+        <input
+          type="button"
+          className={styles.button}
+          value="Back"
+          onClick={onBack}
+        />
+      </div>
     </div>
   );
 };
