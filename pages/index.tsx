@@ -1,37 +1,17 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import { ChangeEventHandler, MouseEventHandler, useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "../styles/Home.module.css";
 import download from "downloadjs";
 import { parse } from "path";
-import Script from "next/script";
-import type { SocketProvider } from "@webcrypto-local/client";
-import { writeSync } from "fs";
 import FileChooser from "../components/FileChooser";
 import Connection from "../components/Connection";
 import { useFortify } from "../components/context/SocketContext";
 import ProviderChooser from "../components/ProviderChooser";
 import CertificateChooser from "../components/CertificateChooser";
 import Summary from "../components/Summary";
-
-import * as pki from "pkijs";
-
-import {
-  addPlaceholder,
-  calculateByteRangePos,
-  findByteRange,
-  getCertificateKey,
-  hex,
-  insertSignature,
-  createPKCS7Signature,
-  signPDF,
-  removePlaceholderSignature,
-  removeTrailingNewLine,
-  replaceByteRange,
-} from "../utils/certificate";
 import { Certificate } from "../models/Certificate.model";
-import { bytes_to_hex } from "asmcrypto.js";
+import { signPDFByForge } from "../utils/signPdf";
 
 const Home: NextPage = () => {
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -59,25 +39,11 @@ const Home: NextPage = () => {
 
     if (!certificateProvider) throw new Error("Can't read from certificate provider");
 
-    const pdf = await signPDF(certificateProvider, selectedCertificate.fullName, selectedFile);
+    const pdf = await signPDFByForge(certificateProvider, selectedCertificate.fullName, selectedFile);
 
     const fileName = parse(selectedFile.name);
     download(new Blob([pdf]), `${fileName.name}_${new Date().toISOString()}${fileName.ext}`, "application/pdf");
   };
-
-  // const presignApi = async () => {
-  //   if (!selectedFile) return;
-
-  //   const body = new FormData();
-  //   body.append("file", selectedFile);
-  //   const response = await fetch("/api/presign", {
-  //     method: "POST",
-  //     body,
-  //   });
-  //   //const fileName = parse(selectedFile.name);
-  //   // download(await response.blob(), `${fileName.name}_${new Date().toISOString()}.${fileName.ext}`);
-  //   return response.arrayBuffer();
-  // };
 
   const backToFiles = () => {
     setSelectedFile(undefined);
