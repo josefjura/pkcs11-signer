@@ -21,12 +21,11 @@ import {
   addPlaceholder,
   calculateByteRangePos,
   findByteRange,
-  getCertificate,
   getCertificateKey,
-  getPKIcert,
   hex,
   insertSignature,
-  newSign,
+  createPKCS7Signature,
+  signPDF,
   removePlaceholderSignature,
   removeTrailingNewLine,
   replaceByteRange,
@@ -57,59 +56,28 @@ const Home: NextPage = () => {
     if (!selectedCertificate?.keyId) return;
     if (!selectedFile) return;
     const certificateProvider = await ws?.getCrypto(selectedProvider.id);
-    const key = await getCertificateKey("private", certificateProvider, selectedCertificate.fullName);
-    if (!key) {
-      throw new Error("Certificate doesn't have private key");
-    }
 
-    let originalPdf = await selectedFile?.arrayBuffer();
+    if (!certificateProvider) throw new Error("Can't read from certificate provider");
 
-    if (!originalPdf) {
-      throw new Error("Problems with presign");
-    }
-
-    const alg = {
-      name: key.algorithm.name,
-      hash: "SHA-256",
-    };
-
-    const cert = await certificateProvider?.certStorage.getItem(selectedCertificate.fullName);
-    const certPem = await certificateProvider?.certStorage.exportCert("pem", cert!);
-
-    originalPdf = addPlaceholder(originalPdf);
-
-    //const cert = await getPKIcert(certificateProvider!, selectedCertificate.fullName);
-    //const signature = await certSign(cert, key, Buffer.from(originalPdf));
-    //const signature = await certificateProvider?.subtle.sign(alg, key, oroginalPdf);
-    const { byteRangePlaceholder } = findByteRange(Buffer.from(originalPdf));
-
-    const byteRange = calculateByteRangePos(Buffer.from(originalPdf), byteRangePlaceholder);
-
-    const signature = newSign(certPem!, key, certificateProvider!, originalPdf, byteRange.placeholderLength);
-    console.log(signature.length);
-
-    let modifiedPdf = replaceByteRange(Buffer.from(originalPdf), byteRange, byteRangePlaceholder);
-    modifiedPdf = removePlaceholderSignature(Buffer.from(modifiedPdf), byteRange);
-    //hex(new Uint8Array(signature!))
-    modifiedPdf = insertSignature(modifiedPdf, signature, byteRange);
+    const pdf = await signPDF(certificateProvider, selectedCertificate.fullName, selectedFile);
 
     const fileName = parse(selectedFile.name);
-    download(new Blob([modifiedPdf]), `${fileName.name}_${new Date().toISOString()}${fileName.ext}`, "application/pdf");
+    download(new Blob([pdf]), `${fileName.name}_${new Date().toISOString()}${fileName.ext}`, "application/pdf");
   };
 
-  const presignApi = async () => {
-    if (!selectedFile) return;
+  // const presignApi = async () => {
+  //   if (!selectedFile) return;
 
-    const body = new FormData();
-    body.append("file", selectedFile);
-    const response = await fetch("/api/presign", {
-      method: "POST",
-      body,
-    });
-    //const fileName = parse(selectedFile.name);
-    // download(await response.blob(), `${fileName.name}_${new Date().toISOString()}.${fileName.ext}`);
-    return response.arrayBuffer();
-  };
+  //   const body = new FormData();
+  //   body.append("file", selectedFile);
+  //   const response = await fetch("/api/presign", {
+  //     method: "POST",
+  //     body,
+  //   });
+  //   //const fileName = parse(selectedFile.name);
+  //   // download(await response.blob(), `${fileName.name}_${new Date().toISOString()}.${fileName.ext}`);
+  //   return response.arrayBuffer();
+  // };
 
   const backToFiles = () => {
     setSelectedFile(undefined);
@@ -126,6 +94,7 @@ const Home: NextPage = () => {
       <Head>
         <title>PKCS11 Signer Tech Demo</title>
         <link rel="icon" href="/favicon.ico" />
+        {/* Je treba prehostovat kvuli CSRF */}
         <script defer src="https://fortifyapp.com/external/asmCrypto/2.3.2/asmcrypto.all.es5.min.js"></script>
         <script defer src="https://fortifyapp.com/external/elliptic/elliptic.min.js"></script>
         <script defer type="module" src="https://fortifyapp.com/external/webcrypto-liner/1.2.3/webcrypto-liner.shim.min.mjs"></script>

@@ -57,7 +57,6 @@ const CertificateChooser = ({ onChosen, providerId, onBack }: CertificateChooser
     }
 
     const item = await crypto.certStorage.getItem(certIndex.fullName);
-    console.log(certIndex);
 
     onChosen({
       entity: item,

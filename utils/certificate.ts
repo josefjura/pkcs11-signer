@@ -27,29 +27,18 @@ export const getCertificateKey = async (type: KeyType, provider: any, certID: st
     return null;
 }
 
-export const getCertificate = async (provider: SocketCrypto, certificateId: string) => {
-    const cryptoCert = await provider.certStorage.getItem(certificateId);
-    const certRawData = await provider.certStorage.exportCert('raw', cryptoCert);
+// export const getPKIcert = async (provider: SocketCrypto, certId: string) => {
+//     const cryptoCert = await provider.certStorage.getItem(certId);
+//     const certRawData = await provider.certStorage.exportCert('raw', cryptoCert);
 
-    const pkiCert = new pki.Certificate({
-        schema: fromBER(certRawData).result,
-    });
+//     const pkiCert = new pki.Certificate({
+//         schema: fromBER(certRawData).result,
+//     });
 
-    return pkiCert;
-}
+//     return pkiCert;
+// }
 
-export const getPKIcert = async (provider: SocketCrypto, certId: string) => {
-    const cryptoCert = await provider.certStorage.getItem(certId);
-    const certRawData = await provider.certStorage.exportCert('raw', cryptoCert);
-
-    const pkiCert = new pki.Certificate({
-        schema: fromBER(certRawData).result,
-    });
-
-    return pkiCert;
-}
-
-// export const sign = async (certificate: any, privateKey: any, pdfBuffer: Buffer) => {
+// export const signWithPKIJS = async (certificate: any, privateKey: any, pdfBuffer: Buffer) => {
 
 //     let cmsSigned = new pki.SignedData({
 //         version: 1,
@@ -90,8 +79,6 @@ const processSignature = (pdf: Buffer, p7: forge.pkcs7.PkcsSignedData, placehold
     const raw = forge.asn1.toDer(p7.toAsn1()).getBytes();
     // placeholderLength represents the length of the HEXified symbols but we're
     // checking the actual lengths.
-    console.log(raw.length, placeholderLength);
-
     if ((raw.length * 2) > placeholderLength) {
         throw new Error(
             `Signature exceeds placeholder length: ${raw.length * 2} > ${placeholderLength}`
@@ -110,9 +97,38 @@ const processSignature = (pdf: Buffer, p7: forge.pkcs7.PkcsSignedData, placehold
     return signature;
 }
 
-export const newSign = (certPem: string, privateKey: CryptoKey, provider: SocketCrypto, pdf: ArrayBuffer, placeholderLength: number) => {
-    console.log(forge);
+export const signPDF = async (certificateProvider: SocketCrypto, certificatName: string, pdf: File) => {
+    const key = await getCertificateKey("private", certificateProvider, certificatName);
+    if (!key) {
+        throw new Error("Certificate doesn't have private key");
+    }
 
+    let originalPdf = await pdf?.arrayBuffer();
+
+    if (!originalPdf) {
+        throw new Error("Can't read PDF document");
+    }
+
+    const cert = await certificateProvider?.certStorage.getItem(certificatName);
+    const certPem = await certificateProvider?.certStorage.exportCert("pem", cert!);
+
+    originalPdf = addPlaceholder(originalPdf, {});
+
+    const { byteRangePlaceholder } = findByteRange(Buffer.from(originalPdf));
+
+    const byteRange = calculateByteRangePos(Buffer.from(originalPdf), byteRangePlaceholder);
+
+    const signature = createPKCS7Signature(certPem!, key, certificateProvider!, originalPdf, byteRange.placeholderLength);
+
+    let modifiedPdf = replaceByteRange(Buffer.from(originalPdf), byteRange, byteRangePlaceholder);
+    modifiedPdf = removePlaceholderSignature(Buffer.from(modifiedPdf), byteRange);
+
+    modifiedPdf = insertSignature(modifiedPdf, signature, byteRange);
+
+    return modifiedPdf;
+}
+
+export const createPKCS7Signature = (certPem: string, privateKey: CryptoKey, provider: SocketCrypto, pdf: ArrayBuffer, placeholderLength: number) => {
     let signer: any = {};
     signer.sign = async (md: any, algo: any) => {
         // https://stackoverflow.com/a/47106124
@@ -134,7 +150,6 @@ export const newSign = (certPem: string, privateKey: CryptoKey, provider: Socket
     // create PKCS#7 signed data with authenticatedAttributes
     // attributes include: PKCS#9 content-type, message-digest, and signing-time
     var p7 = forge.pkcs7.createSignedData();
-    console.log(Object.keys(p7));
     p7.content = forge.util.createBuffer(pdf);
     p7.addCertificate(certPem);
     p7.addSigner({
@@ -158,13 +173,20 @@ export const newSign = (certPem: string, privateKey: CryptoKey, provider: Socket
     return processSignature(Buffer.from(pdf), p7, placeholderLength);
 }
 
-export const addPlaceholder = (pdfBuffer: ArrayBuffer): Uint8Array => {
+type PlaceholderOptions = {
+    reason: string;
+    contactInfo: string;
+    name: string;
+    location: string;
+}
+
+export const addPlaceholder = (pdfBuffer: ArrayBuffer, options: Partial<PlaceholderOptions>): Uint8Array => {
     let pdf = plainAddPlaceholder({
         pdfBuffer: Buffer.from(pdfBuffer),
-        reason: "I am the author",
-        subFilter: SUBFILTER_ETSI_CADES_DETACHED,
-        signatureLength: 3432,
-        name: "example name",
+        reason: options.reason || "Confirming authenticity of the document",
+        contactInfo: options.contactInfo || "",
+        name: options.name || "",
+        location: options.location || "",
     });
 
     return pdf;
