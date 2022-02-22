@@ -14,8 +14,25 @@ import { useFortify } from "../components/context/SocketContext";
 import ProviderChooser from "../components/ProviderChooser";
 import CertificateChooser from "../components/CertificateChooser";
 import Summary from "../components/Summary";
-import { getCertificateKey } from "../utils";
+
+import * as pki from "pkijs";
+
+import {
+  addPlaceholder,
+  calculateByteRangePos,
+  findByteRange,
+  getCertificate,
+  getCertificateKey,
+  getPKIcert,
+  hex,
+  insertSignature,
+  newSign,
+  removePlaceholderSignature,
+  removeTrailingNewLine,
+  replaceByteRange,
+} from "../utils/certificate";
 import { Certificate } from "../models/Certificate.model";
+import { bytes_to_hex } from "asmcrypto.js";
 
 const Home: NextPage = () => {
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -38,11 +55,49 @@ const Home: NextPage = () => {
 
   const sign = async () => {
     if (!selectedCertificate?.keyId) return;
-    const providerForReal = await ws?.getCrypto(selectedProvider.id);
-    const key = await getCertificateKey("private", providerForReal, selectedCertificate.fullName);
+    if (!selectedFile) return;
+    const certificateProvider = await ws?.getCrypto(selectedProvider.id);
+    const key = await getCertificateKey("private", certificateProvider, selectedCertificate.fullName);
+    if (!key) {
+      throw new Error("Certificate doesn't have private key");
+    }
+
+    let originalPdf = await selectedFile?.arrayBuffer();
+
+    if (!originalPdf) {
+      throw new Error("Problems with presign");
+    }
+
+    const alg = {
+      name: key.algorithm.name,
+      hash: "SHA-256",
+    };
+
+    const cert = await certificateProvider?.certStorage.getItem(selectedCertificate.fullName);
+    const certPem = await certificateProvider?.certStorage.exportCert("pem", cert!);
+
+    originalPdf = addPlaceholder(originalPdf);
+
+    //const cert = await getPKIcert(certificateProvider!, selectedCertificate.fullName);
+    //const signature = await certSign(cert, key, Buffer.from(originalPdf));
+    //const signature = await certificateProvider?.subtle.sign(alg, key, oroginalPdf);
+    const { byteRangePlaceholder } = findByteRange(Buffer.from(originalPdf));
+
+    const byteRange = calculateByteRangePos(Buffer.from(originalPdf), byteRangePlaceholder);
+
+    const signature = newSign(certPem!, key, certificateProvider!, originalPdf, byteRange.placeholderLength);
+    console.log(signature.length);
+
+    let modifiedPdf = replaceByteRange(Buffer.from(originalPdf), byteRange, byteRangePlaceholder);
+    modifiedPdf = removePlaceholderSignature(Buffer.from(modifiedPdf), byteRange);
+    //hex(new Uint8Array(signature!))
+    modifiedPdf = insertSignature(modifiedPdf, signature, byteRange);
+
+    const fileName = parse(selectedFile.name);
+    download(new Blob([modifiedPdf]), `${fileName.name}_${new Date().toISOString()}${fileName.ext}`, "application/pdf");
   };
 
-  const uploadToServer = async () => {
+  const presignApi = async () => {
     if (!selectedFile) return;
 
     const body = new FormData();
@@ -51,8 +106,9 @@ const Home: NextPage = () => {
       method: "POST",
       body,
     });
-    const fileName = parse(selectedFile.name);
-    download(await response.blob(), `${fileName.name}_${new Date().toISOString()}.${fileName.ext}`);
+    //const fileName = parse(selectedFile.name);
+    // download(await response.blob(), `${fileName.name}_${new Date().toISOString()}.${fileName.ext}`);
+    return response.arrayBuffer();
   };
 
   const backToFiles = () => {
@@ -68,7 +124,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Czechpoint Signer Tech Demo</title>
+        <title>PKCS11 Signer Tech Demo</title>
         <link rel="icon" href="/favicon.ico" />
         <script defer src="https://fortifyapp.com/external/asmCrypto/2.3.2/asmcrypto.all.es5.min.js"></script>
         <script defer src="https://fortifyapp.com/external/elliptic/elliptic.min.js"></script>
@@ -78,6 +134,7 @@ const Home: NextPage = () => {
         <script defer type="module" src="https://fortifyapp.com/external/webcrypto-local/client/1.6.5/webcrypto-socket.min.mjs"></script>
       </Head>
       <div className={styles.container}>
+        <h1 style={{ marginBottom: "10%", marginTop: "-15%" }}>PKCS11 Signer Tech Demo</h1>
         <div className={styles.centered}>
           <Connection connected={connected} />
           {!selectedFile && <FileChooser onChosen={confirmFile} />}

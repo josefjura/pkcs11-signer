@@ -520,6 +520,11 @@ brorand@^1.1.0:
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
 
+bytestreamjs@^1.0.29:
+  version "1.0.29"
+  resolved "https://registry.yarnpkg.com/bytestreamjs/-/bytestreamjs-1.0.29.tgz#691f8ee8e5a150c61b925993a3eec0911ed17f1d"
+  integrity sha512-Mri3yqoo9YvdaSvD5OYl4Rdu9zCBJInW/Ez31sdlNY4ikMy//EvTTmidfLcs0e+NBvKVEpPzYvJAesjgMdjnZg==
+
 call-bind@^1.0.0, call-bind@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/call-bind/-/call-bind-1.0.2.tgz#b1d4e89e688119c3c9a903ad30abb2f6a919be3c"
@@ -1659,6 +1664,15 @@ picomatch@^2.2.3:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
+pkijs@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/pkijs/-/pkijs-2.2.2.tgz#d0780379a2fb80c892c3ead4bcfb42675b67a982"
+  integrity sha512-xRTEW9LgUeHBe5hRCC4EHvLbO6o3L/t8uEk8cTaSMVEjEcy2G5qJ/bY2ndvrGgZlKDThnTrM4Xlwu8Qpyr6mOg==
+  dependencies:
+    asn1js "^2.1.1"
+    bytestreamjs "^1.0.29"
+    pvutils "^1.0.17"
+
 postcss@8.4.5:
   version "8.4.5"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.5.tgz#bae665764dfd4c6fcc24dc0fdf7e7aa00cc77f95"
@@ -1713,7 +1727,7 @@ pvtsutils@^1.0.10, pvtsutils@^1.0.11, pvtsutils@^1.1.2, pvtsutils@^1.1.7, pvtsut
   dependencies:
     tslib "^2.3.1"
 
-pvutils@latest:
+pvutils@^1.0.17, pvutils@latest:
   version "1.0.17"
   resolved "https://registry.yarnpkg.com/pvutils/-/pvutils-1.0.17.tgz#ade3c74dfe7178944fe44806626bd2e249d996bf"
   integrity sha512-wLHYUQxWaXVQvKnwIDWFVKDJku9XDCvyhhxoq8dc5MFdIlRenyPI9eSfEtcvgHgD7FlvCyGAlWgOzRnZD99GZQ==
