@@ -1,4 +1,4 @@
 declare module "node-signpdf";
-declare module "pkijs";
 
 declare var WebcryptoSocket: any;
+declare var window: any;

@@ -463,7 +463,7 @@ asmcrypto.js@^2.3.2:
   resolved "https://registry.yarnpkg.com/asmcrypto.js/-/asmcrypto.js-2.3.2.tgz#b9f84bd0a1fb82f21f8c29cc284a707ad17bba2e"
   integrity sha512-3FgFARf7RupsZETQ1nHnhLUUvpcttcCq1iZCaVAbJZbCZ5VNRrNyvpDyHTOb0KC3llFcsyOT/a99NZcCbeiEsA==
 
-asn1js@^2.0.26, asn1js@^2.1.1:
+asn1js@^2.0.26, asn1js@^2.1.1, asn1js@latest:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/asn1js/-/asn1js-2.2.0.tgz#d890fcdda86b8a005693df14a986bfb2c2069c57"
   integrity sha512-oagLNqpfNv7CvmyMoexMDNyVDSiq1rya0AEUgcLlNHdHgNl6U/hi8xY370n5y+ZIFEXOx0J4B1qF2NDjMRxklA==
@@ -524,6 +524,15 @@ bytestreamjs@^1.0.29:
   version "1.0.29"
   resolved "https://registry.yarnpkg.com/bytestreamjs/-/bytestreamjs-1.0.29.tgz#691f8ee8e5a150c61b925993a3eec0911ed17f1d"
   integrity sha512-Mri3yqoo9YvdaSvD5OYl4Rdu9zCBJInW/Ez31sdlNY4ikMy//EvTTmidfLcs0e+NBvKVEpPzYvJAesjgMdjnZg==
+
+cadesjs@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/cadesjs/-/cadesjs-1.0.11.tgz#f15f233cb0e577acca205558fe9baa972ec9e748"
+  integrity sha512-KZMCAYenrTPHRV/14FgboMPK4aKZxf8Lb0qx46TCw0niuVSLaUMkDroXVz7Mzv0d1r+mCeeb3lOwwXXq+wdUgw==
+  dependencies:
+    asn1js latest
+    pkijs latest
+    pvutils latest
 
 call-bind@^1.0.0, call-bind@^1.0.2:
   version "1.0.2"
@@ -1664,7 +1673,7 @@ picomatch@^2.2.3:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
-pkijs@^2.2.2:
+pkijs@^2.2.2, pkijs@latest:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/pkijs/-/pkijs-2.2.2.tgz#d0780379a2fb80c892c3ead4bcfb42675b67a982"
   integrity sha512-xRTEW9LgUeHBe5hRCC4EHvLbO6o3L/t8uEk8cTaSMVEjEcy2G5qJ/bY2ndvrGgZlKDThnTrM4Xlwu8Qpyr6mOg==

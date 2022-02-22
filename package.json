@@ -22,8 +22,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "tsprotobuf": "^1.0.17",
-    "webcrypto-liner": "^1.3.1",
-    "pkijs": "^2.2.2"
+    "webcrypto-liner": "^1.3.1"
   },
   "devDependencies": {
     "@types/downloadjs": "^1.4.3",

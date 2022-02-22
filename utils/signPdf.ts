@@ -1,6 +1,7 @@
 import { SocketCrypto } from "@webcrypto-local/client";
 import { getCertificateKey } from "./keys";
-import { calculateByteRangePos, createPKCS7Signature, insertSignature, removePlaceholderSignature, replaceByteRange } from "./signature";
+import { createPKCS7Signature } from "./pkcs7";
+import { calculateByteRangePos, insertSignature, removePlaceholderSignature, replaceByteRange } from "./signature";
 import { addPlaceholder, findByteRange } from "./signPdfWrappers";
 
 export const signPDFByForge = async (certificateProvider: SocketCrypto, certificatName: string, pdf: File) => {
@@ -29,7 +30,7 @@ export const signPDFByForge = async (certificateProvider: SocketCrypto, certific
     const byteRange = calculateByteRangePos(Buffer.from(originalPdf), byteRangePlaceholder);
 
     // Vytvorime PKCS7 podpis
-    const signature = createPKCS7Signature(certPem!, key, certificateProvider!, originalPdf, byteRange.placeholderLength);
+    const signature = await createPKCS7Signature(certPem!, key, certificateProvider!, originalPdf, byteRange.placeholderLength);
 
     // Nahradime dummy byterange realnym
     let modifiedPdf = replaceByteRange(Buffer.from(originalPdf), byteRange, byteRangePlaceholder);
